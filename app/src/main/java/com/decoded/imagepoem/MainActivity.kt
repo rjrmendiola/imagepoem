@@ -22,7 +22,8 @@ class MainActivity : AppCompatActivity() {
         val button = findViewById<Button>(R.id.button)
         button.setOnClickListener {
             // Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, CameraActivity::class.java)
+//            val intent = Intent(this, CameraActivity::class.java)
+            val intent = Intent(this, DetectorActivity::class.java)
             startActivity(intent)
         }
     }

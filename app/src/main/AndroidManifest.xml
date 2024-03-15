@@ -20,6 +20,9 @@
         android:theme="@style/Theme.ImagePoem"
         tools:targetApi="31">
         <activity
+            android:name=".DetectorActivity"
+            android:exported="false" />
+        <activity
             android:name=".CameraActivity"
             android:exported="false" />
         <activity
