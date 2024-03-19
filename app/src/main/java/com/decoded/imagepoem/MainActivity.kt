@@ -3,10 +3,7 @@ package com.decoded.imagepoem
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +16,7 @@ class MainActivity : AppCompatActivity() {
 //            insets
 //        }
 
-        val button = findViewById<Button>(R.id.button)
+        val button = findViewById<Button>(R.id.start_capture)
         button.setOnClickListener {
             // Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show()
 //            val intent = Intent(this, CameraActivity::class.java)
