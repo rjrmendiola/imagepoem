@@ -1,17 +1,24 @@
 package com.decoded.imagepoem
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.media.Image
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
@@ -34,6 +41,10 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
 
     private lateinit var cameraExecutor: ExecutorService
 
+    private lateinit var imageCapture: ImageCapture
+
+    private val detectedObjects = mutableListOf<String>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetectorBinding.inflate(layoutInflater)
@@ -49,6 +60,10 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
+
+        binding.captureImage.setOnClickListener {
+            capturePhoto();
+        }
     }
 
     private fun startCamera() {
@@ -57,6 +72,41 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
             cameraProvider  = cameraProviderFuture.get()
             bindCameraUseCases()
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun capturePhoto() {
+        val imageCapture = imageCapture ?: return
+
+//        imageCapture.takePicture(
+//            ContextCompat.getMainExecutor(this),
+//            object : ImageCapture.OnImageCapturedCallback() {
+//                override fun onCaptureSuccess(image: ImageProxy) {
+//                    super.onCaptureSuccess(image)
+//                    parentFragmentManager.beginTransaction()
+//                        .replace(R.id.container, ImageViewFragment.newInstance(image))
+//                        .addToBackStack(null)
+//                        .commit()
+//                }
+//            }
+//        )
+
+        val objectListString = detectedObjects.joinToString(", ")
+
+        if (detectedObjects.isNotEmpty()) {
+            val intent = Intent(this, LimerickActivity::class.java)
+            intent.putStringArrayListExtra("detectedWords", ArrayList(detectedObjects))
+            startActivity(intent)
+        }
+
+        Log.e(TAG, "Objects: ${objectListString}")
+    }
+
+    private fun Image.toBitmap(): Bitmap {
+        val buffer = planes[0].buffer
+        buffer.rewind()
+        val bytes = ByteArray(buffer.capacity())
+        buffer.get(bytes)
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
     }
 
     private fun bindCameraUseCases() {
@@ -112,6 +162,10 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
             detector.detect(rotatedBitmap)
         }
 
+        imageCapture = ImageCapture.Builder()
+            .setTargetRotation(rotation)
+            .build()
+
         cameraProvider.unbindAll()
 
         try {
@@ -119,7 +173,8 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
                 this,
                 cameraSelector,
                 preview,
-                imageAnalyzer
+                imageAnalyzer,
+                imageCapture
             )
 
             preview?.setSurfaceProvider(binding.viewFinder.surfaceProvider)
@@ -165,6 +220,16 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
     }
 
     override fun onDetect(boundingBoxes: List<BoundingBox>, inferenceTime: Long) {
+        detectedObjects.clear() // Clear previous detections
+
+        for (box in boundingBoxes) {
+            detectedObjects.add(box.clsName) // Assuming 'category' holds the object name
+        }
+
+//        Log.e(TAG, "Boudingboxes: ${boundingBoxes.joinToString()}")
+
+        val objectListString = detectedObjects.joinToString(", ")
+
         runOnUiThread {
             binding.inferenceTime.text = "${inferenceTime}ms"
             binding.overlay.apply {
