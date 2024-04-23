@@ -62,7 +62,7 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         binding.captureImage.setOnClickListener {
-            capturePhoto();
+            capturePhoto()
         }
     }
 
@@ -75,7 +75,7 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
     }
 
     private fun capturePhoto() {
-        val imageCapture = imageCapture ?: return
+        val imageCapture = imageCapture
 
 //        imageCapture.takePicture(
 //            ContextCompat.getMainExecutor(this),

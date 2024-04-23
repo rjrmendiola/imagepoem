@@ -24,7 +24,7 @@ class LimerickActivity : AppCompatActivity() {
         val detectedWords = intent.getStringArrayListExtra("detectedWords") as? ArrayList<String>
 
         if (detectedWords != null) {
-            var limerickGenerator = LimerickGenerator();
+            var limerickGenerator = LimerickGenerator()
             val limerickPoem = limerickGenerator.generateLimerick(detectedWords)
 
             val limerickTextView = findViewById<TextView>(R.id.limerickText)

@@ -158,7 +158,7 @@ class LimerickGenerator {
         return labels
     }
 
-    public fun generateLimerick(words: ArrayList<String>): String {
+    fun generateLimerick(words: ArrayList<String>): String {
         val line1 = getLine1Noun(words[0])
         val line2: String
         val line3: String

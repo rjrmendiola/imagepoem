@@ -55,9 +55,14 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:${camerax_version}")
     // If you want to additionally use the CameraX View class
     implementation("androidx.camera:camera-view:${camerax_version}")
+    implementation("androidx.camera:camera-extensions:${camerax_version}")
 
     implementation("org.tensorflow:tensorflow-lite:2.14.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+
+    val glide_version = "4.13.2"
+    implementation("com.github.bumptech.glide:glide:${glide_version}")
+    // implementation("androidx.legacy:legacy-support-v4:${glide_version}")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

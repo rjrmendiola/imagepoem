@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">ImagePoem</string>
+    <string name="app_title">IMAGE TO POEM</string>
     <string name="intro_message">Unlock the hidden depths of your imagination with our innovative image-to-poem converter, turning captivating visuals into exquisite verses that resonate with emotion and creativity</string>
+    <string name="capture">Capture</string>
+    <string name="start">Start</string>
+    <string name="retry">Retry</string>
+    <string name="generate">Generate</string>
 </resources>
