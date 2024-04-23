@@ -58,10 +58,11 @@ class Camera2Activity : AppCompatActivity() {
         val imageCapture = imageCapture ?: return
 
         // Create time stamped name and MediaStore entry.
-        val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+        val fileName = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
             .format(System.currentTimeMillis())
+
         val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
                 put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image")
@@ -75,8 +76,7 @@ class Camera2Activity : AppCompatActivity() {
                 contentValues)
             .build()
 
-        // Set up image capture listener, which is triggered after photo has
-        // been taken
+        // Set up image capture listener, which is triggered after photo has been taken
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
@@ -87,11 +87,13 @@ class Camera2Activity : AppCompatActivity() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults){
                     val msg = "Photo capture succeeded: ${output.savedUri}"
-//                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
 
                     val savedUri = output.savedUri  // Get the captured image Uri
                     val intent = Intent(this@Camera2Activity, PreviewActivity::class.java)
-                    intent.putExtra("imageUri", savedUri.toString())  // Pass Uri as a string
+                    intent.putExtra("imageUri", savedUri.toString())  // Pass Image Uri as a string
+                    intent.putExtra("imageName", fileName.toString())  // Pass Image Name as a string
+                    intent.putExtra("imagePath", "")  // Pass Image Name as a string
                     startActivity(intent)
                 }
             }

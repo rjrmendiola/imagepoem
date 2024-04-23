@@ -16,23 +16,30 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.decoded.imagepoem.data.AppDatabase
 
 class PreviewActivity : AppCompatActivity(), Detector.DetectorListener {
     private lateinit var detector: Detector
     private val detectedObjects = mutableListOf<String>()
     //private lateinit var bitmap: Bitmap
+    private var imageUri: Uri? = null
+    private var imageName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_preview)
 
         val imageUriString = intent.getStringExtra("imageUri")
-        val imageUri = Uri.parse(imageUriString)
+        imageUri = Uri.parse(imageUriString)
+
+        imageName = intent.getStringExtra("imageName")
 
         val imageView = findViewById<ImageView>(R.id.image_view)  // Your ImageView
 
@@ -41,9 +48,11 @@ class PreviewActivity : AppCompatActivity(), Detector.DetectorListener {
 
         var bitmap: Bitmap? = null
         try {
-            val inputStream = contentResolver.openInputStream(imageUri)
-            bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
+            if (imageUri != null) {
+                val inputStream = contentResolver.openInputStream(Uri.parse(imageUriString))
+                bitmap = BitmapFactory.decodeStream(inputStream)
+                inputStream?.close()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -86,6 +95,8 @@ class PreviewActivity : AppCompatActivity(), Detector.DetectorListener {
         val intent = Intent(this, LimerickActivity::class.java)
         detectedObjects.add("chair")
         intent.putStringArrayListExtra("detectedWords", ArrayList(detectedObjects))
+        intent.putExtra("imageUri", imageUri.toString())  // Pass URI as a string
+        intent.putExtra("imageName", imageName.toString())  // Pass name as a string
         startActivity(intent)
     }
 
@@ -102,6 +113,8 @@ class PreviewActivity : AppCompatActivity(), Detector.DetectorListener {
         if (detectedObjects.isNotEmpty()) {
             val intent = Intent(this, LimerickActivity::class.java)
             intent.putStringArrayListExtra("detectedWords", ArrayList(detectedObjects))
+            intent.putExtra("imageUri", imageUri.toString())  // Pass URI as a string
+            intent.putExtra("imageName", imageName.toString())  // Pass name as a string
             startActivity(intent)
         }
     }
