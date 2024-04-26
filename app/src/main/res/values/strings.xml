@@ -6,4 +6,5 @@
     <string name="start">Start</string>
     <string name="retry">Retry</string>
     <string name="generate">Generate</string>
+    <string name="gallery">Gallery</string>
 </resources>
