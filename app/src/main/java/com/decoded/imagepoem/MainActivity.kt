@@ -20,9 +20,9 @@ class MainActivity : AppCompatActivity() {
         button.setOnClickListener {
             // Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show()
 //            val intent = Intent(this, CameraActivity::class.java)
-//            val intent = Intent(this, DetectorActivity::class.java)
+            val intent = Intent(this, DetectorActivity::class.java)
 //            val intent = Intent(this, CameraxOldActivity::class.java)
-            val intent = Intent(this, Camera2Activity::class.java)
+//            val intent = Intent(this, Camera2Activity::class.java)
 //            val intent = Intent(this, ImageListActivity::class.java)
             startActivity(intent)
         }

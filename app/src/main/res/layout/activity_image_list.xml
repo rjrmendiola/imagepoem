@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     tools:context=".ImageListActivity">
 
     <TextView
@@ -15,12 +16,16 @@
         android:layout_centerHorizontal="true"
         android:padding="16dp"
         android:text="Captured Images"
+        android:textColor="@color/white"
+        android:textStyle="bold"
         android:textSize="20sp" />
 
     <ListView
         android:id="@+id/image_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:background="@color/white"
         android:layout_below="@id/image_list_label" />
 
     <Button

@@ -1,6 +1,8 @@
 package com.decoded.imagepoem
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ListView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +25,12 @@ class ImageListActivity : AppCompatActivity() {
         val images = getImagesFromDatabase(dbHelper)
         adapter.images.addAll(images)
         adapter.notifyDataSetChanged()
+
+        val backButton = findViewById<Button>(R.id.back_button)
+        backButton.setOnClickListener {
+            val intent = Intent(this, DetectorActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun getImagesFromDatabase(dbHelper: DbHelper): ArrayList<Image> {
@@ -38,11 +46,12 @@ class ImageListActivity : AppCompatActivity() {
             null                    // No sorting
         )
         while (cursor.moveToNext()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(DbHelper.ID_COL))
             val uri = cursor.getString(cursor.getColumnIndexOrThrow(DbHelper.URI_COL))
             val name = cursor.getString(cursor.getColumnIndexOrThrow(DbHelper.NAME_COL))
             val path = cursor.getString(cursor.getColumnIndexOrThrow(DbHelper.PATH_COL))
             val content = cursor.getString(cursor.getColumnIndexOrThrow(DbHelper.CONTENT_COL))
-            images.add(Image(uri, name, path, content))
+            images.add(Image(id, uri, name, path, content))
         }
 
         cursor.close()

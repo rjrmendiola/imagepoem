@@ -32,7 +32,7 @@ class DbHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     }
 
     // This method is for adding data in our database
-    fun addImage(uri : String, name : String, path : String, content : String ){
+    fun addImage(uri : String, name : String, path : String, content : String ): Int {
 
         // below we are creating
         // a content values variable
@@ -52,11 +52,13 @@ class DbHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         val db = this.writableDatabase
 
         // all values are inserted into database
-        db.insert(TABLE_NAME, null, values)
+        val newRecordId = db.insert(TABLE_NAME, null, values)
 
         // at last we are
         // closing our database
         db.close()
+
+        return newRecordId.toInt()
     }
 
     // below method is to get
@@ -72,6 +74,51 @@ class DbHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
         // read data from the database
         return db.rawQuery("SELECT * FROM " + TABLE_NAME, null)
 
+    }
+
+    fun getImage(imageId: String): Cursor? {
+        val db = this.readableDatabase
+
+        return db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE id = " + imageId + " LIMIT 1", null)
+    }
+
+    fun getImageRecordById(id: Int): Image? {
+        val db = this.readableDatabase
+        val cursor = db.query(
+            TABLE_NAME,  // Table name
+            null,                   // Select all columns
+            ID_COL + "=?",  // Selection criteria (where id = ?)
+            arrayOf(id.toString()),   // Selection arguments (id value as string)
+            null,                   // No grouping
+            null,                   // No filtering by row groups
+            null                    // No sorting
+        )
+        if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(ID_COL))
+            val uri = cursor.getString(cursor.getColumnIndexOrThrow(URI_COL))
+            val name = cursor.getString(cursor.getColumnIndexOrThrow(NAME_COL))
+            val path = cursor.getString(cursor.getColumnIndexOrThrow(PATH_COL))
+            val content = cursor.getString(cursor.getColumnIndexOrThrow(CONTENT_COL))
+            cursor.close()
+            return Image(id, uri, name, path, content)
+        } else {
+            cursor.close()
+            return null
+        }
+    }
+
+    fun updateImageContent(image: Image, newContent: String): Int {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put(CONTENT_COL, newContent)
+        val rowUpdated = db.update(
+            TABLE_NAME,  // Table name
+            contentValues,           // Values to update
+            ID_COL + "=?",  // Selection criteria
+            arrayOf(image.id.toString())    // Selection arguments (id value)
+        )
+        db.close()
+        return rowUpdated
     }
 
     companion object{

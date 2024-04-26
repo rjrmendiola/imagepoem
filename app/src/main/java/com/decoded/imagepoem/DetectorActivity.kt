@@ -1,13 +1,16 @@
 package com.decoded.imagepoem
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.Image
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +29,8 @@ import androidx.core.content.ContextCompat
 import com.decoded.imagepoem.Constants.LABELS_PATH
 import com.decoded.imagepoem.Constants.MODEL_PATH
 import com.decoded.imagepoem.databinding.ActivityDetectorBinding
+import java.text.SimpleDateFormat
+import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -90,13 +95,79 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
 //            }
 //        )
 
+        // Create time stamped name and MediaStore entry.
+        val fileName = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+            .format(System.currentTimeMillis())
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraX-Image")
+            }
+        }
+
+        // Create output options object which contains file + metadata
+        val outputOptions = ImageCapture.OutputFileOptions
+            .Builder(contentResolver,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                contentValues)
+            .build()
+
+        // Set up image capture listener, which is triggered after photo has been taken
+        imageCapture.takePicture(
+            outputOptions,
+            ContextCompat.getMainExecutor(this),
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onError(exc: ImageCaptureException) {
+                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
+                }
+
+                override fun onImageSaved(output: ImageCapture.OutputFileResults){
+                    val msg = "Photo capture succeeded: ${output.savedUri}"
+                    //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+
+                    //val savedUri = output.savedUri  // Get the captured image Uri
+                    //val intent = Intent(this@Camera2Activity, PreviewActivity::class.java)
+                    //intent.putExtra("imageUri", savedUri.toString())  // Pass Image Uri as a string
+                    //intent.putExtra("imageName", fileName.toString())  // Pass Image Name as a string
+                    //intent.putExtra("imagePath", "")  // Pass Image Name as a string
+                    //startActivity(intent)
+                    try{
+                        val dbHelper = DbHelper(baseContext, null)
+                        val imageId = dbHelper.addImage(
+                            uri = output.savedUri.toString(),
+                            name = fileName,
+                            "",
+                            ""
+                        );
+                        dbHelper.close()
+
+                        val intent = Intent(this@DetectorActivity, LimerickActivity::class.java)
+                        intent.putExtra("imageId", imageId.toString())
+
+                        val objectListString = detectedObjects.joinToString(", ")
+                        intent.putStringArrayListExtra("detectedWords", ArrayList(detectedObjects))
+
+                        startActivity(intent)
+
+                    } catch (e: Exception) {
+                        Log.e(TAG, "" + e.message);
+
+                        val msg = "Photo capture failed: ${e.message}"
+                        Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        )
+
         val objectListString = detectedObjects.joinToString(", ")
 
-        if (detectedObjects.isNotEmpty()) {
-            val intent = Intent(this, LimerickActivity::class.java)
-            intent.putStringArrayListExtra("detectedWords", ArrayList(detectedObjects))
-            startActivity(intent)
-        }
+        //if (detectedObjects.isNotEmpty()) {
+        //    val intent = Intent(this, LimerickActivity::class.java)
+        //    intent.putStringArrayListExtra("detectedWords", ArrayList(detectedObjects))
+        //    startActivity(intent)
+        //}
 
         Log.e(TAG, "Objects: ${objectListString}")
     }
@@ -209,10 +280,16 @@ class DetectorActivity : AppCompatActivity(), Detector.DetectorListener {
 
     companion object {
         private const val TAG = "Camera"
+        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = mutableListOf (
-            Manifest.permission.CAMERA
-        ).toTypedArray()
+        private val REQUIRED_PERMISSIONS =
+            mutableListOf (
+                android.Manifest.permission.CAMERA
+            ).apply {
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                    add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }
+            }.toTypedArray()
     }
 
     override fun onEmptyDetect() {
