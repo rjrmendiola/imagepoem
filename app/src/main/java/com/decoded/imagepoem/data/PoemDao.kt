@@ -9,9 +9,6 @@ import androidx.room.Update
 
 @Dao
 interface PoemDao {
-    @Query("SELECT * FROM poem")
-    fun getAll(): List<Poem>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertPoem(poem: Poem)
 
@@ -20,4 +17,10 @@ interface PoemDao {
 
     @Delete
     suspend fun delete(poem: Poem)
+
+    @Query("SELECT * FROM poems")
+    suspend fun getAllPoems(): List<Poem>
+
+    @Query("SELECT * FROM poems WHERE id = :poemId")
+    suspend fun getPoemById(poemId: Long): Poem
 }
